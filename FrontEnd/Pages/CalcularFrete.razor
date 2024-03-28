@@ -1,0 +1,63 @@
+﻿@using FrontEnd.Model.Request;
+@using System.Net.Http;
+@using System.Net.Http.Json;
+@using FrontEnd.Models.Response;
+
+@inject HttpClient httpClient
+
+@page "/calcularfrete"
+
+<h3>Calcular Frete</h3>
+
+<form @onsubmit="OnSubmitAsync">
+    <button type="submit" @ref="botaoCalcular">Calcular</button>
+</form>
+
+@if (custoFrete != null)
+{
+    <p>Custo do frete: R$ @custoFrete</p>
+}
+
+@code {
+    private CargaResponse carga = new CargaResponse();
+    private decimal? custoFrete;
+
+    private ElementReference botaoCalcular;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await botaoCalcular.FocusAsync();
+    }
+
+    protected override async Task OnSubmitAsync()
+    {
+        await CalcularCustoFrete();
+    }
+
+    async Task CalcularCustoFrete()
+    {
+        try
+        {
+            // Call the API to calculate the freight cost
+            var response = await httpClient.PostAsJsonAsync("/api/frete/calcular", carga);
+
+            if (response.IsSuccessStatusCode)
+            {
+                custoFrete = await response.Content.ReadFromJsonAsync<decimal>();
+            }
+            else
+            {
+                // Handle API errors here
+                custoFrete = null;
+                // Display error message to the user
+            }
+        }
+        catch (Exception ex)
+        {
+            custoFrete = null;
+            Console.WriteLine(ex.Message);
+            // Handle client-side errors here
+            // Display error message to the user
+        }
+    }
+}
