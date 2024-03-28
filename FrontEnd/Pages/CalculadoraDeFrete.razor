@@ -1,0 +1,78 @@
+﻿@page "/calcularfrete"
+@using System.Net.Http
+@using System.Net.Http.Json
+@using System.Threading.Tasks
+@using System
+@using Microsoft.AspNetCore.Components.Forms    
+@using FrontEnd.Model.Request
+@using FrontEnd.Model.Response
+
+<h3>Calculadora de Frete</h3>
+<EditForm Model="_cargaRequest" OnValidSubmit="CalcularFrete">
+    <DataAnnotationsValidator />
+    <div class="row">
+        <div class="col-4">
+            <label>Distância Total (em km)</label>
+            <InputNumber @bind-Value="_cargaRequest.DistanciaTotal" class="form-control" />
+            <ValidationMessage For="() => _cargaRequest.DistanciaTotal" />
+        </div>
+        <div class="col-4">
+            <label>Peso da Carga (em kg)</label>
+            <InputNumber @bind-Value="_cargaRequest.PesoTotalCarga" class="form-control" />
+            <ValidationMessage For="() => _cargaRequest.PesoTotalCarga" />
+        </div>
+        <div class="col-4">
+            <label>Largura (em cm)</label>
+            <InputNumber @bind-Value="_cargaRequest.LarguraPacote" class="form-control" />
+            <ValidationMessage For="() => _cargaRequest.LarguraPacote" />
+        </div>
+        <div class="col-4">
+            <label>Altura (em cm)</label>
+            <InputNumber @bind-Value="_cargaRequest.AlturaPacote" class="form-control" />
+            <ValidationMessage For="() => _cargaRequest.AlturaPacote" />
+        </div>
+        <div class="col-2">
+            <button type="submit" class="btn btn-outline-primary mt-4">Calcular Frete</button>
+        </div>
+
+    </div>
+</EditForm>
+@if (exibirFrete && _cargaResponse != null)
+{
+    <div class="row mt-4 p-5">
+        <div class="col-md-12">
+            <div class="h-100 text-center p-5 rounded-3">
+                <h5>
+                    Valor do Frete: <span>@_cargaResponse.CustoFrete.ToString("C")</span>
+                </h5>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private CargaRequest _cargaRequest { get; set; } = new CargaRequest();
+    private CargaResponse _cargaResponse { get; set; }
+    private bool exibirFrete = false;
+
+    private async Task CalcularFrete()
+    {
+        var apiUrl = $"https://localhost:7028/Frete/obter?Distancia={_cargaRequest.DistanciaTotal}&Altura={_cargaRequest.AlturaPacote}&Largura={_cargaRequest.LarguraPacote}&PesoCarga={_cargaRequest.PesoTotalCarga}";
+        var http = new HttpClient();
+
+        try
+        {
+            _cargaResponse = await http.GetFromJsonAsync<CargaResponse>(apiUrl);
+
+            if (_cargaResponse != null && _cargaResponse.CustoFrete != 0)
+            {
+                exibirFrete = true;
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+}
