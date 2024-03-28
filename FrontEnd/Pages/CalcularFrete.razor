@@ -38,7 +38,6 @@
     {
         try
         {
-            // Call the API to calculate the freight cost
             var response = await httpClient.PostAsJsonAsync("/api/frete/calcular", carga);
 
             if (response.IsSuccessStatusCode)
@@ -47,17 +46,12 @@
             }
             else
             {
-                // Handle API errors here
                 custoFrete = null;
-                // Display error message to the user
             }
         }
         catch (Exception ex)
         {
-            custoFrete = null;
-            Console.WriteLine(ex.Message);
-            // Handle client-side errors here
-            // Display error message to the user
+            custoFrete = null;            
         }
     }
 }
